@@ -1,8 +1,11 @@
 package service
 
+// user_service.go implements UserService
+// It handles password hashing, JWT creation, validation logic
+
 import (
 	"errors"
-	"github/CiroLong/realworld-gin/src/models"
+	"github/CiroLong/realworld-gin/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
