@@ -4,10 +4,12 @@ package service
 // It handles password hashing, JWT creation, validation logic
 
 import (
+	"github/CiroLong/realworld-gin/internal/models"
 	"github/CiroLong/realworld-gin/internal/repository"
 )
 
 type UserService interface {
+	SaveOneUser(m *models.UserModel) error
 	// Register(ctx context.Context, req *models.RegisterRequest) (*model.UserResponse, error)
 }
 
@@ -19,7 +21,11 @@ func NewUserService() UserService {
 	return &userService{userRepo: repository.NewUserRepository()}
 }
 
-func (us *userService) SetPassword(userid uint, password string) error {
+func (us *userService) SaveOneUser(m *models.UserModel) error {
+	return us.userRepo.Save(m)
+}
+
+func (us *userService) SetPassword(user *models.UserModel, password string) error {
 	// TODO:
 
 	//u, err := models.GetUser(userid)
@@ -37,7 +43,7 @@ func (us *userService) SetPassword(userid uint, password string) error {
 	return nil
 }
 
-func (us *userService) CheckPassword(userid uint, password string) error {
+func (us *userService) CheckPassword(user *models.UserModel, password string) error {
 	// TODO:
 
 	//u, err := models.GetUser(userid)

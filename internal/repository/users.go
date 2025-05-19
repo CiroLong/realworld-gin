@@ -9,17 +9,23 @@ import (
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *models.UserModel) error
+
+	Save(data interface{}) error
 }
 
 type userRepository struct {
 	db *gorm.DB
 }
 
+func (ur userRepository) Save(data interface{}) error {
+	return ur.db.Save(data).Error
+}
+
 func NewUserRepository() UserRepository {
 	return &userRepository{db: common.GetDB()}
 }
 
-func (u userRepository) CreateUser(ctx context.Context, user *models.UserModel) error {
+func (ur userRepository) CreateUser(ctx context.Context, user *models.UserModel) error {
 	//TODO implement me
 	panic("implement me")
 }
