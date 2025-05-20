@@ -19,32 +19,36 @@ func stripBearerPrefixFromTokenString(tok string) (string, error) {
 	return tok, nil
 }
 
-// Extract  token from Authorization header
-// Uses PostExtractionFilter to strip "TOKEN " prefix from header
+// AuthorizationHeaderExtractor
+//
+//	Extract  token from Authorization header
+//	Uses PostExtractionFilter to strip "TOKEN " prefix from header
 var AuthorizationHeaderExtractor = &request.PostExtractionFilter{
-	request.HeaderExtractor{"Authorization"},
-	stripBearerPrefixFromTokenString,
+	Extractor: request.HeaderExtractor{"Authorization"},
+	Filter:    stripBearerPrefixFromTokenString,
 }
 
-// Extractor for OAuth2 access tokens.  Looks in 'Authorization'
-// header then 'access_token' argument for a token.
+// MyAuth2Extractor
+//
+//	Extractor for OAuth2 access tokens.  Looks in 'Authorization'
+//	header then 'access_token' argument for a token.
 var MyAuth2Extractor = &request.MultiExtractor{
 	AuthorizationHeaderExtractor,
 	request.ArgumentExtractor{"access_token"},
 }
 
-// A helper to write user_id and user_model to the context
-func UpdateContextUserModel(c *gin.Context, my_user_id uint) {
+// UpdateContextUserModel A helper to write user_id and user_model to the context
+func UpdateContextUserModel(c *gin.Context, myUserId uint) {
 	var myUserModel models.UserModel
-	if my_user_id != 0 {
+	if myUserId != 0 {
 		db := common.GetDB()
-		db.First(&myUserModel, my_user_id)
+		db.First(&myUserModel, myUserId)
 	}
-	c.Set("my_user_id", my_user_id)
+	c.Set("my_user_id", myUserId)
 	c.Set("my_user_model", myUserModel)
 }
 
-// Auth middleware parses JWT, sets current user in context
+// AuthMiddleware Auth middleware parses JWT, sets current user in context
 func AuthMiddleware(auto401 bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		UpdateContextUserModel(c, 0)
@@ -59,9 +63,9 @@ func AuthMiddleware(auto401 bool) gin.HandlerFunc {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			my_user_id := uint(claims["id"].(float64))
+			myUserId := uint(claims["id"].(float64))
 			//fmt.Println(my_user_id,claims["id"])
-			UpdateContextUserModel(c, my_user_id)
+			UpdateContextUserModel(c, myUserId)
 		}
 	}
 }
