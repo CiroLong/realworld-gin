@@ -13,6 +13,8 @@ type UserController interface {
 	RegisterUsers(context *gin.Context)
 
 	Login(context *gin.Context)
+
+	GetCurrentUser(context *gin.Context)
 }
 type userController struct {
 	userService service.UserService
@@ -25,9 +27,9 @@ func NewUserController() UserController {
 
 type UserModelValidator struct {
 	User struct {
-		Username string `form:"username" json:"username" binding:"exists,alphanum,min=4,max=255"`
-		Email    string `form:"email" json:"email" binding:"exists,email"`
-		Password string `form:"password" json:"password" binding:"exists,min=8,max=255"`
+		Username string `form:"username" json:"username" binding:"required,alphanum,min=4,max=255"`
+		Email    string `form:"email" json:"email" binding:"required,email"`
+		Password string `form:"password" json:"password" binding:"required,min=8,max=255"`
 		Bio      string `form:"bio" json:"bio" binding:"max=1024"`
 		Image    string `form:"image" json:"image" binding:"omitempty,url"`
 	} `json:"user"`
@@ -48,7 +50,10 @@ func (self *UserModelValidator) Bind(c *gin.Context) error {
 	self.userModel.Bio = self.User.Bio
 
 	if self.User.Password != common.NBRandomPassword {
-		// TODO: SetPassword
+		err = service.NewUserService().SetPassword(&self.userModel, self.User.Password)
+		if err != nil {
+			return err
+		}
 	}
 	if self.User.Image != "" {
 		self.userModel.Image = &self.User.Image
@@ -99,8 +104,8 @@ func (uc userController) RegisterUsers(c *gin.Context) {
 
 type LoginValidator struct {
 	User struct {
-		Email    string `form:"email" json:"email" binding:"exists,email"`
-		Password string `form:"password"json:"password" binding:"exists,min=8,max=255"`
+		Email    string `form:"email" json:"email" binding:"required,email"`
+		Password string `form:"password" json:"password" binding:"required,min=8,max=255"`
 	} `json:"user"`
 	userModel models.UserModel `json:"-"`
 }
@@ -142,8 +147,14 @@ func (uc userController) Login(c *gin.Context) {
 	// 把UserId和 model 存储在上下文中
 
 	c.Set("my_user_id", userModel.ID)
-	c.Set("my_user_model", userModel)
+	c.Set("my_user_model", *userModel)
 
+	serializer := UserSerializer{c}
+	c.JSON(http.StatusOK, gin.H{"user": serializer.Response()})
+}
+
+// GetCurrentUser Authentication required
+func (uc userController) GetCurrentUser(c *gin.Context) {
 	serializer := UserSerializer{c}
 	c.JSON(http.StatusOK, gin.H{"user": serializer.Response()})
 }

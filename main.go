@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/common"
 	"github/CiroLong/realworld-gin/internal/repository"
+	"github/CiroLong/realworld-gin/internal/router"
 )
 
 // 	运行流程
@@ -24,16 +25,11 @@ func main() {
 	// BuildController
 
 	// register router
-	router := gin.Default()
-
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
+	r := gin.Default()
+	router.Register(r)
 	// middleware
 
 	// Run
 
-	router.Run(":8080") // 监听并在 0.0.0.0:8080 上启动服务
+	r.Run(":8080") // 监听并在 0.0.0.0:8080 上启动服务
 }

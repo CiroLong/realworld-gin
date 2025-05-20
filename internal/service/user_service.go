@@ -14,6 +14,7 @@ type UserService interface {
 	SaveOneUser(m *models.UserModel) error
 
 	CheckPassword(user *models.UserModel, password string) error
+	SetPassword(user *models.UserModel, password string) error
 
 	FindOneUser(userCondition *models.UserModel) (*models.UserModel, error)
 
@@ -33,31 +34,29 @@ func (us *userService) SaveOneUser(m *models.UserModel) error {
 }
 
 func (us *userService) SetPassword(user *models.UserModel, password string) error {
-	// TODO:
+	if user == nil {
+		return errors.New("user not exist")
+	}
+	if len(password) == 0 {
+		return errors.New("password should not be empty!")
+	}
+	bytePassword := []byte(password)
 
-	//u, err := models.GetUser(userid)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//if len(password) == 0 {
-	//	return errors.New("password should not be empty!")
-	//}
-	//bytePassword := []byte(password)
-	//
-	//passwordHash, _ := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
-	//u.PasswordHash = string(passwordHash)
+	passwordHash, _ := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	user.PasswordHash = string(passwordHash)
 	return nil
 }
 
 func (us *userService) CheckPassword(user *models.UserModel, password string) error {
 
-	if user != nil {
+	if user == nil {
 		return errors.New("user not exist")
 	}
 	bytePassword := []byte(password)
 	byteHashedPassword := []byte(user.PasswordHash)
-	return bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword)
+	err := bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword)
+
+	return err
 }
 
 func (us *userService) FindOneUser(userCondition *models.UserModel) (*models.UserModel, error) {
