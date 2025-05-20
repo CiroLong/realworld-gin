@@ -1,16 +1,16 @@
 package repository
 
 import (
-	"context"
 	"github/CiroLong/realworld-gin/internal/common"
 	"github/CiroLong/realworld-gin/internal/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	CreateUser(ctx context.Context, user *models.UserModel) error
-
 	Save(data interface{}) error
+
+	FindOneUserByID(userId uint) (*models.UserModel, error)
+	FindOneUser(condition interface{}) (*models.UserModel, error)
 }
 
 type userRepository struct {
@@ -25,7 +25,16 @@ func NewUserRepository() UserRepository {
 	return &userRepository{db: common.GetDB()}
 }
 
-func (ur userRepository) CreateUser(ctx context.Context, user *models.UserModel) error {
-	//TODO implement me
-	panic("implement me")
+func (ur userRepository) FindOneUserByID(userId uint) (*models.UserModel, error) {
+	user := &models.UserModel{}
+	err := ur.db.First(user, userId).Error
+	return user, err
+}
+
+// FindOneUser
+// userModel, err := FindOneUser(&UserModel{Username: "username0"})
+func (ur userRepository) FindOneUser(condition interface{}) (*models.UserModel, error) {
+	model := &models.UserModel{}
+	err := ur.db.Where(condition).First(&model).Error
+	return model, err
 }

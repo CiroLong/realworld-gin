@@ -4,12 +4,19 @@ package service
 // It handles password hashing, JWT creation, validation logic
 
 import (
+	"errors"
 	"github/CiroLong/realworld-gin/internal/models"
 	"github/CiroLong/realworld-gin/internal/repository"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
 	SaveOneUser(m *models.UserModel) error
+
+	CheckPassword(user *models.UserModel, password string) error
+
+	FindOneUser(userCondition *models.UserModel) (*models.UserModel, error)
+
 	// Register(ctx context.Context, req *models.RegisterRequest) (*model.UserResponse, error)
 }
 
@@ -44,14 +51,15 @@ func (us *userService) SetPassword(user *models.UserModel, password string) erro
 }
 
 func (us *userService) CheckPassword(user *models.UserModel, password string) error {
-	// TODO:
 
-	//u, err := models.GetUser(userid)
-	//if err != nil {
-	//	return err
-	//}
-	//bytePassword := []byte(password)
-	//byteHashedPassword := []byte(u.PasswordHash)
-	//return bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword)
-	return nil
+	if user != nil {
+		return errors.New("user not exist")
+	}
+	bytePassword := []byte(password)
+	byteHashedPassword := []byte(user.PasswordHash)
+	return bcrypt.CompareHashAndPassword(byteHashedPassword, bytePassword)
+}
+
+func (us *userService) FindOneUser(userCondition *models.UserModel) (*models.UserModel, error) {
+	return us.userRepo.FindOneUser(userCondition)
 }

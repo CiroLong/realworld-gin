@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/common"
 	"github/CiroLong/realworld-gin/internal/models"
@@ -10,6 +11,8 @@ import (
 
 type UserController interface {
 	RegisterUsers(context *gin.Context)
+
+	Login(context *gin.Context)
 }
 type userController struct {
 	userService service.UserService
@@ -92,4 +95,55 @@ func (uc userController) RegisterUsers(c *gin.Context) {
 
 	serializer := UserSerializer{c}
 	c.JSON(http.StatusCreated, gin.H{"user": serializer.Response()})
+}
+
+type LoginValidator struct {
+	User struct {
+		Email    string `form:"email" json:"email" binding:"exists,email"`
+		Password string `form:"password"json:"password" binding:"exists,min=8,max=255"`
+	} `json:"user"`
+	userModel models.UserModel `json:"-"`
+}
+
+func (lv *LoginValidator) Bind(c *gin.Context) error {
+	err := common.Bind(c, lv)
+	if err != nil {
+		return err
+	}
+
+	lv.userModel.Email = lv.User.Email
+	return nil
+}
+
+func NewLoginValidator() LoginValidator {
+	loginValidator := LoginValidator{}
+	return loginValidator
+}
+
+func (uc userController) Login(c *gin.Context) {
+	loginValidator := NewLoginValidator()
+	if err := loginValidator.Bind(c); err != nil {
+		c.JSON(http.StatusUnprocessableEntity, common.NewValidatorError(err))
+		return
+	}
+
+	// 使用email查询
+	userModel, err := uc.userService.FindOneUser(&models.UserModel{Email: loginValidator.userModel.Email})
+	if err != nil {
+		c.JSON(http.StatusForbidden, common.NewError("login", errors.New("Not Registered email or invalid password")))
+		return
+	}
+
+	if uc.userService.CheckPassword(userModel, loginValidator.User.Password) != nil {
+		c.JSON(http.StatusForbidden, common.NewError("login", errors.New("Not Registered email or invalid password")))
+		return
+	}
+
+	// 把UserId和 model 存储在上下文中
+
+	c.Set("my_user_id", userModel.ID)
+	c.Set("my_user_model", userModel)
+
+	serializer := UserSerializer{c}
+	c.JSON(http.StatusOK, gin.H{"user": serializer.Response()})
 }
