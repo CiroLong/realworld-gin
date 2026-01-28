@@ -1,11 +1,11 @@
-package middlewares
+package middleware
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/golang-jwt/jwt/v5/request"
 	"github/CiroLong/realworld-gin/internal/common"
-	"github/CiroLong/realworld-gin/internal/models"
+	"github/CiroLong/realworld-gin/internal/model"
 	"net/http"
 	"strings"
 )
@@ -39,7 +39,7 @@ var MyAuth2Extractor = &request.MultiExtractor{
 
 // UpdateContextUserModel A helper to write user_id and user_model to the context
 func UpdateContextUserModel(c *gin.Context, myUserId uint) {
-	var myUserModel models.UserModel
+	var myUserModel model.UserModel
 	if myUserId != 0 {
 		db := common.GetDB()
 		db.First(&myUserModel, myUserId)

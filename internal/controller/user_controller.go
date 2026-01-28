@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/common"
-	"github/CiroLong/realworld-gin/internal/models"
+	"github/CiroLong/realworld-gin/internal/model"
 	"github/CiroLong/realworld-gin/internal/service"
 	"net/http"
 )
@@ -33,7 +33,7 @@ type UserModelValidator struct {
 		Bio      string `form:"bio" json:"bio" binding:"max=1024"`
 		Image    string `form:"image" json:"image" binding:"omitempty,url"`
 	} `json:"user"`
-	userModel models.UserModel `json:"-"`
+	userModel model.UserModel `json:"-"`
 }
 
 func NewUserModelValidator() UserModelValidator {
@@ -74,7 +74,7 @@ type UserResponse struct {
 }
 
 func (self *UserSerializer) Response() UserResponse {
-	myUserModel := self.c.MustGet("my_user_model").(models.UserModel)
+	myUserModel := self.c.MustGet("my_user_model").(model.UserModel)
 	user := UserResponse{
 		Username: myUserModel.Username,
 		Email:    myUserModel.Email,
@@ -107,7 +107,7 @@ type LoginValidator struct {
 		Email    string `form:"email" json:"email" binding:"required,email"`
 		Password string `form:"password" json:"password" binding:"required,min=8,max=255"`
 	} `json:"user"`
-	userModel models.UserModel `json:"-"`
+	userModel model.UserModel `json:"-"`
 }
 
 func (lv *LoginValidator) Bind(c *gin.Context) error {
@@ -133,7 +133,7 @@ func (uc userController) Login(c *gin.Context) {
 	}
 
 	// 使用email查询
-	userModel, err := uc.userService.FindOneUser(&models.UserModel{Email: loginValidator.userModel.Email})
+	userModel, err := uc.userService.FindOneUser(&model.UserModel{Email: loginValidator.userModel.Email})
 	if err != nil {
 		c.JSON(http.StatusForbidden, common.NewError("login", errors.New("Not Registered email or invalid password")))
 		return

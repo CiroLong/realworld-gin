@@ -5,20 +5,20 @@ package service
 
 import (
 	"errors"
-	"github/CiroLong/realworld-gin/internal/models"
+	"github/CiroLong/realworld-gin/internal/model"
 	"github/CiroLong/realworld-gin/internal/repository"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
-	SaveOneUser(m *models.UserModel) error
+	SaveOneUser(m *model.UserModel) error
 
-	CheckPassword(user *models.UserModel, password string) error
-	SetPassword(user *models.UserModel, password string) error
+	CheckPassword(user *model.UserModel, password string) error
+	SetPassword(user *model.UserModel, password string) error
 
-	FindOneUser(userCondition *models.UserModel) (*models.UserModel, error)
+	FindOneUser(userCondition *model.UserModel) (*model.UserModel, error)
 
-	// Register(ctx context.Context, req *models.RegisterRequest) (*model.UserResponse, error)
+	// Register(ctx context.Context, req *model.RegisterRequest) (*model.UserResponse, error)
 }
 
 type userService struct {
@@ -29,11 +29,11 @@ func NewUserService() UserService {
 	return &userService{userRepo: repository.NewUserRepository()}
 }
 
-func (us *userService) SaveOneUser(m *models.UserModel) error {
+func (us *userService) SaveOneUser(m *model.UserModel) error {
 	return us.userRepo.Save(m)
 }
 
-func (us *userService) SetPassword(user *models.UserModel, password string) error {
+func (us *userService) SetPassword(user *model.UserModel, password string) error {
 	if user == nil {
 		return errors.New("user not exist")
 	}
@@ -47,7 +47,7 @@ func (us *userService) SetPassword(user *models.UserModel, password string) erro
 	return nil
 }
 
-func (us *userService) CheckPassword(user *models.UserModel, password string) error {
+func (us *userService) CheckPassword(user *model.UserModel, password string) error {
 
 	if user == nil {
 		return errors.New("user not exist")
@@ -59,6 +59,6 @@ func (us *userService) CheckPassword(user *models.UserModel, password string) er
 	return err
 }
 
-func (us *userService) FindOneUser(userCondition *models.UserModel) (*models.UserModel, error) {
+func (us *userService) FindOneUser(userCondition *model.UserModel) (*model.UserModel, error) {
 	return us.userRepo.FindOneUser(userCondition)
 }

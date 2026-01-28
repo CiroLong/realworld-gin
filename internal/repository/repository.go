@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github/CiroLong/realworld-gin/internal/common"
-	"github/CiroLong/realworld-gin/internal/models"
+	"github/CiroLong/realworld-gin/internal/model"
 )
 
 //	职责：
@@ -18,11 +18,11 @@ import (
 func AutoMigrate() {
 	db := common.GetDB()
 
-	db.AutoMigrate(&models.UserModel{})
-	db.AutoMigrate(&models.FollowModel{})
-	db.AutoMigrate(&models.ArticleModel{})
-	db.AutoMigrate(&models.TagModel{})
-	db.AutoMigrate(&models.FavoriteModel{})
-	db.AutoMigrate(&models.ArticleUserModel{})
-	db.AutoMigrate(&models.CommentModel{})
+	db.AutoMigrate(&model.UserModel{})
+	db.AutoMigrate(&model.FollowModel{})
+	db.AutoMigrate(&model.ArticleModel{})
+	db.AutoMigrate(&model.TagModel{})
+	db.AutoMigrate(&model.FavoriteModel{})
+	db.AutoMigrate(&model.ArticleUserModel{})
+	db.AutoMigrate(&model.CommentModel{})
 }
