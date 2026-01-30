@@ -3,7 +3,7 @@ package middleware
 // Auth Middleware 负责从 HTTP 请求中解析 JWT，校验合法性，并将用户身份注入上下文。
 // internal/middleware/auth.go
 import (
-	"github/CiroLong/realworld-gin/internal-v2/pkg/jwt"
+	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"net/http"
 	"strings"
 

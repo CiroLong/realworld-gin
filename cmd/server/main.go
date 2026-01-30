@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github/CiroLong/realworld-gin/internal-v2/config"
-	"github/CiroLong/realworld-gin/internal-v2/pkg/jwt"
-	"github/CiroLong/realworld-gin/internal-v2/repository/gorm"
-	"github/CiroLong/realworld-gin/internal-v2/router"
-	"github/CiroLong/realworld-gin/internal-v2/service"
+	"github/CiroLong/realworld-gin/internal/config"
+	"github/CiroLong/realworld-gin/internal/pkg/jwt"
+	"github/CiroLong/realworld-gin/internal/repository/gorm"
+	"github/CiroLong/realworld-gin/internal/router"
+	"github/CiroLong/realworld-gin/internal/service"
 	"log"
 )
 

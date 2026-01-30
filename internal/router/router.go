@@ -2,10 +2,10 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github/CiroLong/realworld-gin/internal-v2/api"
-	"github/CiroLong/realworld-gin/internal-v2/middleware"
-	"github/CiroLong/realworld-gin/internal-v2/pkg/jwt"
-	"github/CiroLong/realworld-gin/internal-v2/service"
+	"github/CiroLong/realworld-gin/internal/api"
+	"github/CiroLong/realworld-gin/internal/middleware"
+	"github/CiroLong/realworld-gin/internal/pkg/jwt"
+	"github/CiroLong/realworld-gin/internal/service"
 )
 
 func NewRouter(userService service.UserService, jwtMgr jwt.Manager) *gin.Engine {

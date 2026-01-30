@@ -3,8 +3,8 @@ package gorm
 import (
 	"context"
 	"errors"
-	"github/CiroLong/realworld-gin/internal-v2/model/entity"
-	"github/CiroLong/realworld-gin/internal-v2/repository"
+	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/repository"
 
 	"gorm.io/gorm"
 )

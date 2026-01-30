@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github/CiroLong/realworld-gin/internal-v2/model/dto/user"
+	"github/CiroLong/realworld-gin/internal/model/dto/user"
 )
 
 type UserService interface {

@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
-	"github/CiroLong/realworld-gin/internal-v2/model/entity"
+	"github/CiroLong/realworld-gin/internal/model/entity"
 )
 
 var (

@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"errors"
-	"github/CiroLong/realworld-gin/internal-v2/model/dto/user"
-	"github/CiroLong/realworld-gin/internal-v2/model/entity"
-	"github/CiroLong/realworld-gin/internal-v2/pkg/jwt"
-	"github/CiroLong/realworld-gin/internal-v2/pkg/password"
-	"github/CiroLong/realworld-gin/internal-v2/repository"
+	"github/CiroLong/realworld-gin/internal/model/dto/user"
+	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/pkg/jwt"
+	"github/CiroLong/realworld-gin/internal/pkg/password"
+	"github/CiroLong/realworld-gin/internal/repository"
 )
 
 type userService struct {

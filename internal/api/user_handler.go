@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github/CiroLong/realworld-gin/internal-v2/middleware"
-	"github/CiroLong/realworld-gin/internal-v2/model/dto/user"
-	"github/CiroLong/realworld-gin/internal-v2/service"
+	"github/CiroLong/realworld-gin/internal/middleware"
+	"github/CiroLong/realworld-gin/internal/model/dto/user"
+	"github/CiroLong/realworld-gin/internal/service"
 	"net/http"
 )
 
