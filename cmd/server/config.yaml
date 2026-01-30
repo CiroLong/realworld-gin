@@ -1,0 +1,14 @@
+server:
+  addr: ":8080"
+  read_timeout: 5s
+  write_timeout: 5s
+
+database:
+  dsn: "user:password@tcp(127.0.0.1:3306)/app?charset=utf8mb4&parseTime=true"
+  max_open_conns: 50
+  max_idle_conns: 10
+  conn_max_lifetime: 1h
+
+jwt:
+  secret: "jwt-sdasdkjahcv-secret-key"
+  expire_time: 24h

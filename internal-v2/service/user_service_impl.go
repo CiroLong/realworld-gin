@@ -51,11 +51,11 @@ func (s *userService) Register(
 
 	// 4. 构造 Entity
 	u := &entity.User{
-		Email:        req.User.Email,
-		Username:     req.User.Username,
-		PasswordHash: hash,
-		Bio:          "",
-		Image:        "",
+		Email:    req.User.Email,
+		Username: req.User.Username,
+		Password: hash,
+		Bio:      "",
+		Image:    "",
 	}
 
 	// 5. 持久化
@@ -96,7 +96,7 @@ func (s *userService) Login(
 	}
 
 	// 2. 校验密码
-	if !password.Verify(u.PasswordHash, req.User.Password) {
+	if !password.Verify(u.Password, req.User.Password) {
 		return nil, errors.New("invalid email or password")
 	}
 

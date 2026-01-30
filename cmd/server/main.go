@@ -1,35 +1,49 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github/CiroLong/realworld-gin/internal/common"
-	"github/CiroLong/realworld-gin/internal/repository"
-	"github/CiroLong/realworld-gin/internal/router"
+	"github/CiroLong/realworld-gin/internal-v2/config"
+	"github/CiroLong/realworld-gin/internal-v2/pkg/jwt"
+	"github/CiroLong/realworld-gin/internal-v2/repository/gorm"
+	"github/CiroLong/realworld-gin/internal-v2/router"
+	"github/CiroLong/realworld-gin/internal-v2/service"
+	"log"
 )
 
 // 	运行流程
-//	从 main.go 加载配置
+//	从 main.go
+//	加载配置
 //	初始化数据库连接
-//	通过依赖注入逐层构建 Controller
+//	依赖注入
 //	注册路由和中间件
 //	启动 Gin 服务
 
 func main() {
-	// Do some work to init
-	// Load Config
+	// 1. 读配置
+	if err := config.Load(); err != nil {
+		log.Fatalf("load cfg failed: %v", err)
+	}
+	cfg := config.C()
 
-	// Init DB
-	common.InitDB()
-	repository.AutoMigrate()
+	// 2. 链接数据库
+	if err := gorm.InitDB(); err != nil {
+		log.Fatalf("initDB failed: %v", err)
+	}
+	db := gorm.GetDB()
+	err := gorm.AutoMigrate()
+	if err != nil {
+		log.Fatalf("initDB AutoMigrate failed: %v", err)
+	}
 
-	// BuildController
+	// 3. 参数注入service
+	jwtMgr := jwt.NewManager(
+		cfg.JWT.Secret,
+		cfg.JWT.ExpireTime,
+	)
 
-	// register router
-	r := gin.Default()
-	router.Register(r)
-	// middleware
+	userRepo := gorm.NewUserRepo(db)
+	userService := service.NewUserService(userRepo, jwtMgr)
 
-	// Run
-
-	r.Run(":8080") // 监听并在 0.0.0.0:8080 上启动服务
+	// 4. 注册路由和中间件
+	r := router.NewRouter(userService, jwtMgr)
+	r.Run(":8080")
 }
