@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github/CiroLong/realworld-gin/internal/model/entity"
 	"github/CiroLong/realworld-gin/internal/repository"
+	"gorm.io/gorm/clause"
 
 	"gorm.io/gorm"
 )
@@ -97,4 +98,41 @@ func (r *UserRepo) Update(ctx context.Context, user *entity.User) error {
 	}
 
 	return nil
+}
+
+func (r *UserRepo) IsFollowing(ctx context.Context, followerID int64, followingID int64) (bool, error) {
+	var count int64
+	err := r.db.WithContext(ctx).
+		Model(&entity.Follow{}).
+		Where("follower_id = ? AND following_id = ?", followerID, followingID).
+		Count(&count).Error
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (r *UserRepo) Follow(ctx context.Context, followerID int64, followingID int64) error {
+	follow := &entity.Follow{
+		FollowerID:  followerID,
+		FollowingID: followingID,
+	}
+
+	err := r.db.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			DoNothing: true,
+		}).
+		Create(follow).Error
+
+	return err
+}
+
+func (r *UserRepo) UnFollow(ctx context.Context, followerID int64, followingID int64) error {
+	err := r.db.WithContext(ctx).
+		Where("follower_id = ? AND following_id = ?", followerID, followingID).
+		Delete(&entity.Follow{}).Error
+
+	return err
 }

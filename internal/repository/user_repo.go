@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	ErrUserNotFound      = errors.New("user not found")
-	ErrEmailAlreadyExist = errors.New("email already exists")
-	ErrUserAlreadyExist  = errors.New("user already exists")
+	ErrUserNotFound     = errors.New("user not found")
+	ErrUserAlreadyExist = errors.New("user already exists")
 )
 
 // interface 接口与实现解耦
@@ -29,4 +28,8 @@ type UserRepo interface {
 
 	// Update 更新用户信息（部分字段）
 	Update(ctx context.Context, user *entity.User) error
+
+	IsFollowing(ctx context.Context, followerID int64, followingID int64) (bool, error)
+	Follow(ctx context.Context, followerID int64, followingID int64) error
+	UnFollow(ctx context.Context, followerID int64, followingID int64) error
 }

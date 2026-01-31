@@ -45,8 +45,10 @@ func GetDB() *gorm.DB {
 func AutoMigrate() error {
 	return DB.AutoMigrate(
 		&entity.User{},
-		// TODO: 加入剩余entity
-		// &entity.Article{},
-		// &entity.Comment{},
+		&entity.Article{},
+		&entity.Tag{},
+		&entity.ArticleTag{},
+		&entity.Favorite{},
+		&entity.Follow{},
 	)
 }

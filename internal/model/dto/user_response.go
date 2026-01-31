@@ -1,4 +1,4 @@
-package user
+package dto
 
 // User
 // {
@@ -22,11 +22,13 @@ type UserDTO struct {
 	Bio      string `json:"bio"`
 	Image    string `json:"image"`
 }
+
+type ProfileDTO struct {
+	Username  string `json:"username"`
+	Bio       string `json:"bio"`
+	Image     string `json:"image"`
+	Following bool   `json:"following"`
+}
 type ProfileResponse struct {
-	Profile struct {
-		Username  string `json:"username"`
-		Bio       string `json:"bio"`
-		Image     string `json:"image"`
-		Following bool   `json:"following"`
-	} `json:"profile"`
+	Profile ProfileDTO `json:"profile"`
 }

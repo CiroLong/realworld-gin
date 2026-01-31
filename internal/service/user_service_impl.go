@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github/CiroLong/realworld-gin/internal/model/dto/user"
+	"github/CiroLong/realworld-gin/internal/model/dto"
 	"github/CiroLong/realworld-gin/internal/model/entity"
 	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"github/CiroLong/realworld-gin/internal/pkg/password"
@@ -27,7 +27,7 @@ func NewUserService(
 	}
 }
 
-func (s *userService) Register(ctx context.Context, req *user.RegisterRequest) (*user.UserResponse, error) {
+func (s *userService) Register(ctx context.Context, req *dto.RegisterRequest) (*dto.UserResponse, error) {
 
 	// 1. email 是否已存在
 	if _, err := s.userRepo.FindByEmail(ctx, req.User.Email); err == nil {
@@ -74,8 +74,8 @@ func (s *userService) Register(ctx context.Context, req *user.RegisterRequest) (
 	}
 
 	// 7. 组装 Response DTO
-	return &user.UserResponse{
-		User: user.UserDTO{
+	return &dto.UserResponse{
+		User: dto.UserDTO{
 			Email:    u.Email,
 			Username: u.Username,
 			Bio:      u.Bio,
@@ -85,7 +85,7 @@ func (s *userService) Register(ctx context.Context, req *user.RegisterRequest) (
 	}, nil
 }
 
-func (s *userService) Login(ctx context.Context, req *user.LoginRequest) (*user.UserResponse, error) {
+func (s *userService) Login(ctx context.Context, req *dto.LoginRequest) (*dto.UserResponse, error) {
 
 	// 1. 根据 email 查用户
 	u, err := s.userRepo.FindByEmail(ctx, req.User.Email)
@@ -108,8 +108,8 @@ func (s *userService) Login(ctx context.Context, req *user.LoginRequest) (*user.
 	}
 
 	// 4. 返回 Response DTO
-	return &user.UserResponse{
-		User: user.UserDTO{
+	return &dto.UserResponse{
+		User: dto.UserDTO{
 			Email:    u.Email,
 			Username: u.Username,
 			Bio:      u.Bio,
@@ -120,7 +120,7 @@ func (s *userService) Login(ctx context.Context, req *user.LoginRequest) (*user.
 }
 
 // authed
-func (s *userService) GetCurrentUser(ctx context.Context, userID int64) (*user.UserResponse, error) {
+func (s *userService) GetCurrentUser(ctx context.Context, userID int64) (*dto.UserResponse, error) {
 	// 1. 根据 userID 查用户
 	u, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
@@ -134,8 +134,8 @@ func (s *userService) GetCurrentUser(ctx context.Context, userID int64) (*user.U
 	}
 
 	// 3. 组装响应 DTO
-	return &user.UserResponse{
-		User: user.UserDTO{
+	return &dto.UserResponse{
+		User: dto.UserDTO{
 			Email:    u.Email,
 			Username: u.Username,
 			Bio:      u.Bio,
@@ -146,7 +146,7 @@ func (s *userService) GetCurrentUser(ctx context.Context, userID int64) (*user.U
 }
 
 // authed
-func (s *userService) UpdateCurrentUser(ctx context.Context, userID int64, req *user.UpdateUserRequest) (*user.UserResponse, error) {
+func (s *userService) UpdateCurrentUser(ctx context.Context, userID int64, req *dto.UpdateUserRequest) (*dto.UserResponse, error) {
 	// 1. 查当前用户（确保存在）
 	u, err := s.userRepo.FindByID(ctx, userID)
 	if err != nil {
@@ -189,13 +189,89 @@ func (s *userService) UpdateCurrentUser(ctx context.Context, userID int64, req *
 	}
 
 	// 5. 响应
-	return &user.UserResponse{
-		User: user.UserDTO{
+	return &dto.UserResponse{
+		User: dto.UserDTO{
 			Email:    u.Email,
 			Username: u.Username,
 			Bio:      u.Bio,
 			Image:    u.Image,
 			Token:    token,
+		},
+	}, nil
+}
+
+func (s *userService) FollowUserByName(ctx context.Context, userID int64, username string) (*dto.ProfileResponse, error) {
+	// 1. 找目标用户
+	target, err := s.userRepo.FindByUsername(ctx, username)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// 2. 不允许关注自己（可选，但很推荐）
+	if target.ID == userID {
+		return nil, errors.New("cannot follow yourself")
+	}
+
+	// 3. 建立 follow 关系（Repo 层保证幂等）
+	if err := s.userRepo.Follow(ctx, userID, target.ID); err != nil {
+		return nil, err
+	}
+
+	// 4. 返回 profile（following 一定是 true）
+	return &dto.ProfileResponse{
+		Profile: dto.ProfileDTO{
+			Username:  target.Username,
+			Bio:       target.Bio,
+			Image:     target.Image,
+			Following: true,
+		},
+	}, nil
+}
+
+func (s *userService) UnfollowUserByName(ctx context.Context, userID int64, username string) (*dto.ProfileResponse, error) {
+	// 1. 找目标用户
+	target, err := s.userRepo.FindByUsername(ctx, username)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// 2. 删除 follow 关系（幂等）
+	if err := s.userRepo.UnFollow(ctx, userID, target.ID); err != nil {
+		return nil, err
+	}
+
+	// 3. 返回 profile（following 一定是 false）
+	return &dto.ProfileResponse{
+		Profile: dto.ProfileDTO{
+			Username:  target.Username,
+			Bio:       target.Bio,
+			Image:     target.Image,
+			Following: false,
+		},
+	}, nil
+}
+
+// userID 传0时不需要读follow关系
+func (s *userService) GetProfile(ctx context.Context, username string, userID int64) (*dto.ProfileResponse, error) {
+	// 1. 查目标用户
+	target, err := s.userRepo.FindByUsername(ctx, username)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// 2. 是否关注
+	following := false
+	if userID > 0 && userID != target.ID {
+		following, _ = s.userRepo.IsFollowing(ctx, userID, target.ID)
+	}
+
+	// 3. 返回 profile
+	return &dto.ProfileResponse{
+		Profile: dto.ProfileDTO{
+			Username:  target.Username,
+			Bio:       target.Bio,
+			Image:     target.Image,
+			Following: following,
 		},
 	}, nil
 }

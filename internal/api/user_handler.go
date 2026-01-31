@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/middleware"
-	"github/CiroLong/realworld-gin/internal/model/dto/user"
+	"github/CiroLong/realworld-gin/internal/model/dto"
 	"github/CiroLong/realworld-gin/internal/service"
 	"net/http"
 )
@@ -25,7 +25,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 // POST /api/users
 func (h *UserHandler) Register(c *gin.Context) {
 	// 1. 处理请求
-	var req user.RegisterRequest
+	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"errors": gin.H{"body": []string{err.Error()}},
@@ -51,7 +51,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 // POST /api/users/login
 func (h *UserHandler) Login(c *gin.Context) {
 	// 1. 处理请求
-	var req user.LoginRequest
+	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"errors": gin.H{"body": []string{err.Error()}},
@@ -114,7 +114,7 @@ func (h *UserHandler) UpdateCurrentUser(c *gin.Context) {
 	userID := uidVal.(int64)
 
 	// 2. 解析请求
-	var req user.UpdateUserRequest
+	var req dto.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{
 			"errors": gin.H{"body": []string{err.Error()}},

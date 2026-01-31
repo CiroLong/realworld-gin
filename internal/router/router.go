@@ -8,7 +8,11 @@ import (
 	"github/CiroLong/realworld-gin/internal/service"
 )
 
-func NewRouter(userService service.UserService, jwtMgr jwt.Manager) *gin.Engine {
+func NewRouter(
+	userService service.UserService,
+	articleService service.ArticleService,
+	jwtMgr jwt.Manager,
+) *gin.Engine {
 	r := gin.New()
 
 	// 全局中间件
@@ -17,6 +21,7 @@ func NewRouter(userService service.UserService, jwtMgr jwt.Manager) *gin.Engine 
 
 	// handler
 	userHandler := api.NewUserHandler(userService)
+	articleHandler := api.NewArticleHandler(articleService)
 
 	apiGroup := r.Group("/api")
 	{
@@ -30,6 +35,27 @@ func NewRouter(userService service.UserService, jwtMgr jwt.Manager) *gin.Engine 
 		{
 			authGroup.GET("/user", userHandler.GetCurrentUser)
 			authGroup.PUT("/user", userHandler.UpdateCurrentUser)
+		}
+	}
+	{
+		articles := apiGroup.Group("/articles")
+		// -------- tags --------
+		articles.GET("/tags", articleHandler.GetTags)
+		// -------- feed --------
+		articles.GET("/feed", middleware.AuthMiddleware(jwtMgr), articleHandler.FeedArticles)
+		// -------- public --------
+		articles.GET("", articleHandler.ListArticles)
+		articles.GET("/:slug", articleHandler.GetArticle)
+
+		// -------- auth required --------
+		articlesAuthGroup := articles.Use(middleware.AuthMiddleware(jwtMgr))
+		{
+			articlesAuthGroup.POST("", articleHandler.CreateArticle)
+			articlesAuthGroup.PUT("/:slug", articleHandler.UpdateArticle)
+			articlesAuthGroup.DELETE("/:slug", articleHandler.DeleteArticle)
+
+			articlesAuthGroup.POST("/:slug/favorite", articleHandler.FavoriteArticle)
+			articlesAuthGroup.DELETE("/:slug/favorite", articleHandler.UnfavoriteArticle)
 		}
 	}
 
