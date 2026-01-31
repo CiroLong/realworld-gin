@@ -23,7 +23,7 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 // Register
 // Registration
 // POST /api/users
-func (h UserHandler) Register(c *gin.Context) {
+func (h *UserHandler) Register(c *gin.Context) {
 	// 1. 处理请求
 	var req user.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

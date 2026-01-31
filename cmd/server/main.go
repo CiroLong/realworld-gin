@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github/CiroLong/realworld-gin/internal/config"
 	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"github/CiroLong/realworld-gin/internal/repository/gorm"
@@ -23,6 +24,7 @@ func main() {
 		log.Fatalf("load cfg failed: %v", err)
 	}
 	cfg := config.C()
+	fmt.Printf("%#v", cfg)
 
 	// 2. 链接数据库
 	if err := gorm.InitDB(); err != nil {
