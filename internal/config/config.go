@@ -73,18 +73,3 @@ func Load() error {
 	cfg = &c
 	return nil
 }
-
-func setDefaults(v *viper.Viper) {
-	// server
-	v.SetDefault("server.addr", ":8080")
-	v.SetDefault("server.read_timeout", "5s")
-	v.SetDefault("server.write_timeout", "5s")
-
-	// database
-	v.SetDefault("database.max_open_conns", 50)
-	v.SetDefault("database.max_idle_conns", 10)
-	v.SetDefault("database.conn_max_lifetime", "1h")
-
-	// jwt
-	v.SetDefault("jwt.expire_time", "24h")
-}

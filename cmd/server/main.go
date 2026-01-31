@@ -44,8 +44,10 @@ func main() {
 
 	userRepo := gorm.NewUserRepo(db)
 	userService := service.NewUserService(userRepo, jwtMgr)
+	articleRepo := gorm.NewArticleRepo(db)
+	articleService := service.NewArticleService(articleRepo, userRepo)
 
 	// 4. 注册路由和中间件
-	r := router.NewRouter(userService, jwtMgr)
+	r := router.NewRouter(userService, articleService, jwtMgr)
 	r.Run(":8080")
 }
