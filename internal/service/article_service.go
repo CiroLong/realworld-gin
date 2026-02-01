@@ -2,11 +2,8 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github/CiroLong/realworld-gin/internal/model/dto"
 )
-
-var ErrPermissionDenied = errors.New("permission denied")
 
 type ArticleService interface {
 	CreateArticle(ctx context.Context, authorID int64, req *dto.CreateArticleRequest) (*dto.ArticleResponse, error)

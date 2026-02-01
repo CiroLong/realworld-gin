@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github/CiroLong/realworld-gin/internal/model/dto"
 	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/pkg/utils"
 	"github/CiroLong/realworld-gin/internal/repository"
 )
@@ -76,7 +77,7 @@ func (s articleService) GetArticle(ctx context.Context, slug string) (*dto.Artic
 	// 1. 获取文章
 	article, err := s.articleRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		return nil, repository.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 
 	// 2. 获取作者
@@ -115,12 +116,12 @@ func (s articleService) UpdateArticle(ctx context.Context, slug string, userID i
 	// 1. 查article
 	article, err := s.articleRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		return nil, repository.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 
 	// 无权限更新
 	if article.AuthorID != userID {
-		return nil, ErrPermissionDenied
+		return nil, common.ErrPermissionDenied
 	}
 
 	// 只更新非空字段
@@ -167,11 +168,11 @@ func (s articleService) UpdateArticle(ctx context.Context, slug string, userID i
 func (s articleService) DeleteArticle(ctx context.Context, slug string, userID int64) error {
 	article, err := s.articleRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		return repository.ErrNotFound
+		return common.ErrNotFound
 	}
 
 	if article.AuthorID != userID {
-		return ErrPermissionDenied
+		return common.ErrPermissionDenied
 	}
 
 	return s.articleRepo.Delete(ctx, article.ID)
@@ -181,7 +182,7 @@ func (s articleService) DeleteArticle(ctx context.Context, slug string, userID i
 func (s articleService) FavoriteArticle(ctx context.Context, slug string, userID int64) (*dto.ArticleResponse, error) {
 	article, err := s.articleRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		return nil, repository.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 
 	favorited, err := s.articleRepo.IsFavorited(ctx, userID, article.ID)
@@ -225,7 +226,7 @@ func (s articleService) FavoriteArticle(ctx context.Context, slug string, userID
 func (s articleService) UnfavoriteArticle(ctx context.Context, slug string, userID int64) (*dto.ArticleResponse, error) {
 	article, err := s.articleRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		return nil, repository.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 	favorited, err := s.articleRepo.IsFavorited(ctx, userID, article.ID)
 	if err != nil {

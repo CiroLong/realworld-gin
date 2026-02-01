@@ -50,5 +50,6 @@ func AutoMigrate() error {
 		&entity.ArticleTag{},
 		&entity.Favorite{},
 		&entity.Follow{},
+		&entity.Comment{},
 	)
 }

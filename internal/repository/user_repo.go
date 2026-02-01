@@ -2,13 +2,7 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"github/CiroLong/realworld-gin/internal/model/entity"
-)
-
-var (
-	ErrUserNotFound     = errors.New("user not found")
-	ErrUserAlreadyExist = errors.New("user already exists")
 )
 
 // interface 接口与实现解耦

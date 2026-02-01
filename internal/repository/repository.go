@@ -1,5 +1,3 @@
 package repository
 
-import "errors"
-
-var ErrNotFound = errors.New("record not found")
+// repo 层只做CURD以及数据一致性保证

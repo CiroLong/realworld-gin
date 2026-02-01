@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/middleware"
 	"github/CiroLong/realworld-gin/internal/model/dto"
-	"github/CiroLong/realworld-gin/internal/repository"
+	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/service"
 	"net/http"
 	"strconv"
@@ -64,7 +64,7 @@ func (h *ArticleHandler) GetArticle(c *gin.Context) {
 	// 2. 调用service
 	resp, err := h.articleService.GetArticle(c.Request.Context(), slug)
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errError(err))
 			return
 		}
@@ -103,11 +103,11 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	// 3. 调用service
 	resp, err := h.articleService.UpdateArticle(c.Request.Context(), slug, userID.(int64), &req)
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errError(err))
 			return
 		}
-		if errors.Is(err, service.ErrPermissionDenied) {
+		if errors.Is(err, common.ErrPermissionDenied) {
 			c.JSON(http.StatusForbidden, errError(err))
 			return
 		}
@@ -136,11 +136,11 @@ func (h *ArticleHandler) DeleteArticle(c *gin.Context) {
 
 	err := h.articleService.DeleteArticle(c.Request.Context(), slug, userID.(int64))
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errError(err))
 			return
 		}
-		if errors.Is(err, service.ErrPermissionDenied) {
+		if errors.Is(err, common.ErrPermissionDenied) {
 			c.JSON(http.StatusForbidden, errError(err))
 			return
 		}
@@ -169,7 +169,7 @@ func (h *ArticleHandler) FavoriteArticle(c *gin.Context) {
 
 	resp, err := h.articleService.FavoriteArticle(c.Request.Context(), slug, userID.(int64))
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errError(err))
 			return
 		}
@@ -198,7 +198,7 @@ func (h *ArticleHandler) UnfavoriteArticle(c *gin.Context) {
 
 	resp, err := h.articleService.UnfavoriteArticle(c.Request.Context(), slug, userID.(int64))
 	if err != nil {
-		if errors.Is(err, repository.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errError(err))
 			return
 		}

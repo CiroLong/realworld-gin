@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/pkg/utils"
 	"github/CiroLong/realworld-gin/internal/repository"
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ func (a articleRepo) FindBySlug(ctx context.Context, slug string) (*entity.Artic
 	var article entity.Article
 	err := a.db.WithContext(ctx).Where("slug = ?", slug).First(&article).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, repository.ErrNotFound
+		return nil, common.ErrNotFound
 	}
 	return &article, err
 }

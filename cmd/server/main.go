@@ -46,8 +46,11 @@ func main() {
 	userService := service.NewUserService(userRepo, jwtMgr)
 	articleRepo := gorm.NewArticleRepo(db)
 	articleService := service.NewArticleService(articleRepo, userRepo)
+	commentRepo := gorm.NewCommentRepo(db)
+	commentService := service.NewCommentService(commentRepo, articleRepo, userRepo)
 
 	// 4. 注册路由和中间件
-	r := router.NewRouter(userService, articleService, jwtMgr)
-	r.Run(":8080")
+	r := router.NewRouter(userService, articleService, commentService, jwtMgr)
+
+	r.Run(cfg.Server.Addr)
 }

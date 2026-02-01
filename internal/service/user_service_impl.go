@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github/CiroLong/realworld-gin/internal/model/dto"
 	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"github/CiroLong/realworld-gin/internal/pkg/password"
 	"github/CiroLong/realworld-gin/internal/repository"
@@ -32,7 +33,7 @@ func (s *userService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	// 1. email 是否已存在
 	if _, err := s.userRepo.FindByEmail(ctx, req.User.Email); err == nil {
 		return nil, errors.New("email already exists")
-	} else if !errors.Is(err, repository.ErrUserNotFound) {
+	} else if !errors.Is(err, common.ErrUserNotFound) {
 		log.Println("err", err.Error())
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func (s *userService) Register(ctx context.Context, req *dto.RegisterRequest) (*
 	// 2. username 是否已存在
 	if _, err := s.userRepo.FindByUsername(ctx, req.User.Username); err == nil {
 		return nil, errors.New("username already exists")
-	} else if !errors.Is(err, repository.ErrUserNotFound) {
+	} else if !errors.Is(err, common.ErrUserNotFound) {
 		log.Println("err", err.Error())
 		return nil, err
 	}
@@ -90,7 +91,7 @@ func (s *userService) Login(ctx context.Context, req *dto.LoginRequest) (*dto.Us
 	// 1. 根据 email 查用户
 	u, err := s.userRepo.FindByEmail(ctx, req.User.Email)
 	if err != nil {
-		if errors.Is(err, repository.ErrUserNotFound) {
+		if errors.Is(err, common.ErrUserNotFound) {
 			return nil, errors.New("invalid email or password")
 		}
 		return nil, err

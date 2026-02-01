@@ -11,6 +11,7 @@ import (
 func NewRouter(
 	userService service.UserService,
 	articleService service.ArticleService,
+	commentService service.CommentService,
 	jwtMgr jwt.Manager,
 ) *gin.Engine {
 	r := gin.New()
@@ -22,6 +23,7 @@ func NewRouter(
 	// handler
 	userHandler := api.NewUserHandler(userService)
 	articleHandler := api.NewArticleHandler(articleService)
+	commentHandler := api.NewCommentHandler(commentService)
 
 	apiGroup := r.Group("/api")
 	{
@@ -57,6 +59,13 @@ func NewRouter(
 			articlesAuthGroup.POST("/:slug/favorite", articleHandler.FavoriteArticle)
 			articlesAuthGroup.DELETE("/:slug/favorite", articleHandler.UnfavoriteArticle)
 		}
+	}
+	comments := r.Group("/api/articles/:slug/comments")
+
+	{
+		comments.GET("", commentHandler.GetComments)
+		comments.POST("", middleware.AuthMiddleware(jwtMgr), commentHandler.CreateComment)
+		comments.DELETE("/:id", middleware.AuthMiddleware(jwtMgr), commentHandler.DeleteComment)
 	}
 
 	return r

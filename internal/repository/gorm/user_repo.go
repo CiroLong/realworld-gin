@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github/CiroLong/realworld-gin/internal/model/entity"
+	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/repository"
 	"gorm.io/gorm/clause"
 
@@ -26,7 +27,7 @@ func (r *UserRepo) Create(ctx context.Context, user *entity.User) error {
 
 	// 唯一索引冲突（email / username）
 	if errors.Is(err, gorm.ErrDuplicatedKey) {
-		return repository.ErrUserAlreadyExist
+		return common.ErrUserAlreadyExist
 	}
 
 	return err
@@ -40,7 +41,7 @@ func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*entity.User,
 		First(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, repository.ErrUserNotFound
+		return nil, common.ErrUserNotFound
 	}
 
 	if err != nil {
@@ -58,7 +59,7 @@ func (r *UserRepo) FindByUsername(ctx context.Context, username string) (*entity
 		First(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, repository.ErrUserNotFound
+		return nil, common.ErrUserNotFound
 	}
 
 	if err != nil {
@@ -73,7 +74,7 @@ func (r *UserRepo) FindByID(ctx context.Context, id int64) (*entity.User, error)
 
 	err := r.db.WithContext(ctx).First(&user, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, repository.ErrUserNotFound
+		return nil, common.ErrUserNotFound
 	}
 
 	if err != nil {
@@ -94,7 +95,7 @@ func (r *UserRepo) Update(ctx context.Context, user *entity.User) error {
 	}
 
 	if res.RowsAffected == 0 {
-		return repository.ErrUserNotFound
+		return common.ErrUserNotFound
 	}
 
 	return nil
