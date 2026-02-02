@@ -35,20 +35,6 @@ services:
       mysql:
         condition: service_healthy
     environment:
-      # 服务器配置
-      - APP_SERVER_ADDR=0.0.0.0:8000
-      - APP_SERVER_READ_TIMEOUT=30s
-      - APP_SERVER_WRITE_TIMEOUT=30s
-      
-      # 数据库配置
-      - APP_DATABASE_DSN=realworld:realworld@tcp(mysql:3306)/realworld?charset=utf8mb4&parseTime=True&loc=Local
-      - APP_DATABASE_MAX_OPEN_CONNS=25
-      - APP_DATABASE_MAX_IDLE_CONNS=10
-      - APP_DATABASE_CONN_MAX_LIFETIME=5m
-      
-      # JWT配置
-      - APP_JWT_SECRET=your-secret-key-change-in-production
-      - APP_JWT_EXPIRE_TIME=24h
     ports:
       - "8000:8000"
     volumes:
