@@ -1,11 +1,12 @@
 package router
 
 import (
-	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/api"
 	"github/CiroLong/realworld-gin/internal/middleware"
 	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"github/CiroLong/realworld-gin/internal/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func NewRouter(
@@ -22,50 +23,75 @@ func NewRouter(
 
 	// handler
 	userHandler := api.NewUserHandler(userService)
+	profileHandler := api.NewProfileHandler(userService)
 	articleHandler := api.NewArticleHandler(articleService)
 	commentHandler := api.NewCommentHandler(commentService)
 
+	// middleware
+	auth := middleware.AuthMiddleware(jwtMgr)
+
 	apiGroup := r.Group("/api")
+
+	// ============ Authentication ============
 	{
-		// 注册 & 登录（公开）
+		// POST /api/users - Registration
 		apiGroup.POST("/users", userHandler.Register)
+		// POST /api/users/login - Authentication
 		apiGroup.POST("/users/login", userHandler.Login)
-
-		// 需要登录
-		authGroup := apiGroup.Group("/")
-		authGroup.Use(middleware.AuthMiddleware(jwtMgr))
-		{
-			authGroup.GET("/user", userHandler.GetCurrentUser)
-			authGroup.PUT("/user", userHandler.UpdateCurrentUser)
-		}
+		// GET /api/user - Get current user
+		apiGroup.GET("/user", auth, userHandler.GetCurrentUser)
+		// PUT /api/user - Update current user
+		apiGroup.PUT("/user", auth, userHandler.UpdateCurrentUser)
 	}
+
+	// ============ Profiles ============
 	{
-		articles := apiGroup.Group("/articles")
-		// -------- tags --------
-		articles.GET("/tags", articleHandler.GetTags)
-		// -------- feed --------
-		articles.GET("/feed", middleware.AuthMiddleware(jwtMgr), articleHandler.FeedArticles)
-		// -------- public --------
-		articles.GET("", articleHandler.ListArticles)
-		articles.GET("/:slug", articleHandler.GetArticle)
-
-		// -------- auth required --------
-		articlesAuthGroup := articles.Use(middleware.AuthMiddleware(jwtMgr))
-		{
-			articlesAuthGroup.POST("", articleHandler.CreateArticle)
-			articlesAuthGroup.PUT("/:slug", articleHandler.UpdateArticle)
-			articlesAuthGroup.DELETE("/:slug", articleHandler.DeleteArticle)
-
-			articlesAuthGroup.POST("/:slug/favorite", articleHandler.FavoriteArticle)
-			articlesAuthGroup.DELETE("/:slug/favorite", articleHandler.UnfavoriteArticle)
-		}
+		// GET /api/profiles/:username - Get profile
+		apiGroup.GET("/profiles/:username", profileHandler.GetProfile)
+		// POST /api/profiles/:username/follow - Follow user
+		apiGroup.POST("/profiles/:username/follow", auth, profileHandler.Follow)
+		// DELETE /api/profiles/:username/follow - Unfollow user
+		apiGroup.DELETE("/profiles/:username/follow", auth, profileHandler.Unfollow)
 	}
-	comments := r.Group("/api/articles/:slug/comments")
 
+	// ============ Articles ============
 	{
-		comments.GET("", commentHandler.GetComments)
-		comments.POST("", middleware.AuthMiddleware(jwtMgr), commentHandler.CreateComment)
-		comments.DELETE("/:id", middleware.AuthMiddleware(jwtMgr), commentHandler.DeleteComment)
+		// GET /api/articles - List articles
+		apiGroup.GET("/articles", articleHandler.ListArticles)
+		// GET /api/articles/feed - Feed articles
+		apiGroup.GET("/articles/feed", auth, articleHandler.FeedArticles)
+		// GET /api/articles/:slug - Get article
+		apiGroup.GET("/articles/:slug", articleHandler.GetArticle)
+		// POST /api/articles - Create article
+		apiGroup.POST("/articles", auth, articleHandler.CreateArticle)
+		// PUT /api/articles/:slug - Update article
+		apiGroup.PUT("/articles/:slug", auth, articleHandler.UpdateArticle)
+		// DELETE /api/articles/:slug - Delete article
+		apiGroup.DELETE("/articles/:slug", auth, articleHandler.DeleteArticle)
+	}
+
+	// ============ Comments ============
+	{
+		// POST /api/articles/:slug/comments - Create comment
+		apiGroup.POST("/articles/:slug/comments", auth, commentHandler.CreateComment)
+		// GET /api/articles/:slug/comments - Get comments
+		apiGroup.GET("/articles/:slug/comments", commentHandler.GetComments)
+		// DELETE /api/articles/:slug/comments/:id - Delete comment
+		apiGroup.DELETE("/articles/:slug/comments/:id", auth, commentHandler.DeleteComment)
+	}
+
+	// ============ Favorite ============
+	{
+		// POST /api/articles/:slug/favorite - Favorite article
+		apiGroup.POST("/articles/:slug/favorite", auth, articleHandler.FavoriteArticle)
+		// DELETE /api/articles/:slug/favorite - Unfavorite article
+		apiGroup.DELETE("/articles/:slug/favorite", auth, articleHandler.UnfavoriteArticle)
+	}
+
+	// ============ Tags ============
+	{
+		// GET /api/tags - Get tags
+		apiGroup.GET("/tags", articleHandler.GetTags)
 	}
 
 	return r

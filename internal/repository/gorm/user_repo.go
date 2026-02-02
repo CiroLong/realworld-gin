@@ -6,9 +6,9 @@ import (
 	"github/CiroLong/realworld-gin/internal/model/entity"
 	"github/CiroLong/realworld-gin/internal/pkg/common"
 	"github/CiroLong/realworld-gin/internal/repository"
-	"gorm.io/gorm/clause"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserRepo struct {

@@ -1,11 +1,12 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"github/CiroLong/realworld-gin/internal/middleware"
 	"github/CiroLong/realworld-gin/internal/model/dto"
 	"github/CiroLong/realworld-gin/internal/service"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {

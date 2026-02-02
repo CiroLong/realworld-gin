@@ -3,6 +3,7 @@ package gorm
 import (
 	"github/CiroLong/realworld-gin/internal/config"
 	"github/CiroLong/realworld-gin/internal/model/entity"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
