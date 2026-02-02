@@ -137,7 +137,7 @@ func (a articleRepo) AddFavorite(ctx context.Context, userID, articleID int64) e
 		err := tx.Where("article_id = ? AND user_id = ?", articleID, userID).First(&fav).Error
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// 不存在才插入
-			if err := tx.Create(&entity.Favorite{ArticleID: articleID, UserID: userID}).Error; err != nil {
+			if err = tx.Create(&entity.Favorite{ArticleID: articleID, UserID: userID}).Error; err != nil {
 				return err
 			}
 			// 增加计数
@@ -220,22 +220,22 @@ func (a articleRepo) List(ctx context.Context, query repository.ListArticlesFilt
 }
 
 func (a articleRepo) Feed(ctx context.Context, userID int64, limit, offset int) ([]*entity.Article, int64, error) {
-	db := a.db.WithContext(ctx).
+	baseQuery := a.db.WithContext(ctx).
 		Model(&entity.Article{}).
 		Joins(
 			"JOIN follows f ON f.following_id = articles.author_id").
 		Where("f.follower_id = ?", userID)
 
-	// 总数
+	// 总数 - 使用临时变量，避免影响后续查询
 	var total int64
-	if err := db.
-		Distinct("articles.id").
+	if err := baseQuery.
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
+	// 查询文章列表
 	var articles []*entity.Article
-	if err := db.
+	if err := baseQuery.
 		Order("articles.created_at DESC").
 		Limit(limit).
 		Offset(offset).

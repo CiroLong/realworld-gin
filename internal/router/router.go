@@ -32,67 +32,83 @@ func NewRouter(
 
 	apiGroup := r.Group("/api")
 
-	// ============ Authentication ============
+	// ==================== Authentication ====================
+	// 认证相关路由
+	usersGroup := apiGroup.Group("/users")
 	{
-		// POST /api/users - Registration
-		apiGroup.POST("/users", userHandler.Register)
-		// POST /api/users/login - Authentication
-		apiGroup.POST("/users/login", userHandler.Login)
-		// GET /api/user - Get current user
-		apiGroup.GET("/user", auth, userHandler.GetCurrentUser)
-		// PUT /api/user - Update current user
-		apiGroup.PUT("/user", auth, userHandler.UpdateCurrentUser)
+		// 公开路由
+		usersGroup.POST("", userHandler.Register)         // POST /api/users - 注册
+		usersGroup.POST("/login", userHandler.Login)    // POST /api/users/login - 登录
 	}
 
-	// ============ Profiles ============
+	// 当前用户相关路由（需要认证）
+	userGroup := apiGroup.Group("/user")
+	userGroup.Use(auth)
 	{
-		// GET /api/profiles/:username - Get profile
-		apiGroup.GET("/profiles/:username", profileHandler.GetProfile)
-		// POST /api/profiles/:username/follow - Follow user
-		apiGroup.POST("/profiles/:username/follow", auth, profileHandler.Follow)
-		// DELETE /api/profiles/:username/follow - Unfollow user
-		apiGroup.DELETE("/profiles/:username/follow", auth, profileHandler.Unfollow)
+		userGroup.GET("", userHandler.GetCurrentUser)    // GET /api/user - 获取当前用户
+		userGroup.PUT("", userHandler.UpdateCurrentUser) // PUT /api/user - 更新当前用户
 	}
 
-	// ============ Articles ============
+	// ==================== Profiles ====================
+	// 用户资料相关路由
+	profilesGroup := apiGroup.Group("/profiles")
 	{
-		// GET /api/articles - List articles
-		apiGroup.GET("/articles", articleHandler.ListArticles)
-		// GET /api/articles/feed - Feed articles
-		apiGroup.GET("/articles/feed", auth, articleHandler.FeedArticles)
-		// GET /api/articles/:slug - Get article
-		apiGroup.GET("/articles/:slug", articleHandler.GetArticle)
-		// POST /api/articles - Create article
-		apiGroup.POST("/articles", auth, articleHandler.CreateArticle)
-		// PUT /api/articles/:slug - Update article
-		apiGroup.PUT("/articles/:slug", auth, articleHandler.UpdateArticle)
-		// DELETE /api/articles/:slug - Delete article
-		apiGroup.DELETE("/articles/:slug", auth, articleHandler.DeleteArticle)
+		// 公开路由
+		profilesGroup.GET("/:username", profileHandler.GetProfile) // GET /api/profiles/:username - 获取用户资料
+
+		// 需要认证的路由
+		profilesAuthGroup := profilesGroup.Group("/:username")
+		profilesAuthGroup.Use(auth)
+		{
+			profilesAuthGroup.POST("/follow", profileHandler.Follow)       // POST /api/profiles/:username/follow - 关注用户
+			profilesAuthGroup.DELETE("/follow", profileHandler.Unfollow)    // DELETE /api/profiles/:username/follow - 取消关注
+		}
 	}
 
-	// ============ Comments ============
+	// ==================== Articles ====================
+	// 文章相关路由
+	articlesGroup := apiGroup.Group("/articles")
 	{
-		// POST /api/articles/:slug/comments - Create comment
-		apiGroup.POST("/articles/:slug/comments", auth, commentHandler.CreateComment)
-		// GET /api/articles/:slug/comments - Get comments
-		apiGroup.GET("/articles/:slug/comments", commentHandler.GetComments)
-		// DELETE /api/articles/:slug/comments/:id - Delete comment
-		apiGroup.DELETE("/articles/:slug/comments/:id", auth, commentHandler.DeleteComment)
+		// 公开路由
+		articlesGroup.GET("", articleHandler.ListArticles)         // GET /api/articles - 文章列表
+
+		// Feed 路由（需要认证）- 必须放在 /:slug 前面，否则会被当作 slug 处理
+		articlesGroup.GET("/feed", auth, articleHandler.FeedArticles)   // GET /api/articles/feed - 文章Feed
+
+		// 公开路由
+		articlesGroup.GET("/:slug", articleHandler.GetArticle)     // GET /api/articles/:slug - 获取文章详情
+
+		// 需要认证的路由
+		articlesAuthGroup := articlesGroup.Group("")
+		articlesAuthGroup.Use(auth)
+		{
+			articlesAuthGroup.POST("", articleHandler.CreateArticle)                 // POST /api/articles - 创建文章
+			articlesAuthGroup.PUT("/:slug", articleHandler.UpdateArticle)            // PUT /api/articles/:slug - 更新文章
+			articlesAuthGroup.DELETE("/:slug", articleHandler.DeleteArticle)         // DELETE /api/articles/:slug - 删除文章
+			articlesAuthGroup.POST("/:slug/favorite", articleHandler.FavoriteArticle)     // POST /api/articles/:slug/favorite - 收藏文章
+			articlesAuthGroup.DELETE("/:slug/favorite", articleHandler.UnfavoriteArticle) // DELETE /api/articles/:slug/favorite - 取消收藏
+		}
 	}
 
-	// ============ Favorite ============
+	// ==================== Comments ====================
+	// 评论相关路由
+	commentsGroup := apiGroup.Group("/articles/:slug/comments")
 	{
-		// POST /api/articles/:slug/favorite - Favorite article
-		apiGroup.POST("/articles/:slug/favorite", auth, articleHandler.FavoriteArticle)
-		// DELETE /api/articles/:slug/favorite - Unfavorite article
-		apiGroup.DELETE("/articles/:slug/favorite", auth, articleHandler.UnfavoriteArticle)
+		// 公开路由
+		commentsGroup.GET("", commentHandler.GetComments) // GET /api/articles/:slug/comments - 获取评论
+
+		// 需要认证的路由
+		commentsAuthGroup := commentsGroup.Group("")
+		commentsAuthGroup.Use(auth)
+		{
+			commentsAuthGroup.POST("", commentHandler.CreateComment)           // POST /api/articles/:slug/comments - 创建评论
+			commentsAuthGroup.DELETE("/:id", commentHandler.DeleteComment)     // DELETE /api/articles/:slug/comments/:id - 删除评论
+		}
 	}
 
-	// ============ Tags ============
-	{
-		// GET /api/tags - Get tags
-		apiGroup.GET("/tags", articleHandler.GetTags)
-	}
+	// ==================== Tags ====================
+	// 标签相关路由（公开）
+	apiGroup.GET("/tags", articleHandler.GetTags) // GET /api/tags - 获取标签列表
 
 	return r
 }

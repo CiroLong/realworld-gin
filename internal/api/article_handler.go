@@ -223,7 +223,7 @@ func (h *ArticleHandler) ListArticles(c *gin.Context) {
 
 	var userID int64
 	if uid, exists := c.Get(middleware.ContextUserIDKey); exists {
-		userID = int64(uid.(uint))
+		userID = uid.(int64)
 	}
 
 	resp, err := h.articleService.ListArticles(c.Request.Context(), tag, author, favorited, userID, limit, offset)
@@ -248,7 +248,7 @@ func (h *ArticleHandler) FeedArticles(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 
-	resp, err := h.articleService.FeedArticles(c.Request.Context(), int64(userID.(uint)), limit, offset)
+	resp, err := h.articleService.FeedArticles(c.Request.Context(), userID.(int64), limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errError(err))
 		return
