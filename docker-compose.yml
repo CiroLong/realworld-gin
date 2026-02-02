@@ -17,6 +17,56 @@ services:
     command:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - realworld-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: realworld-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # 服务器配置
+      - APP_SERVER_ADDR=0.0.0.0:8000
+      - APP_SERVER_READ_TIMEOUT=30s
+      - APP_SERVER_WRITE_TIMEOUT=30s
+      
+      # 数据库配置
+      - APP_DATABASE_DSN=realworld:realworld@tcp(mysql:3306)/realworld?charset=utf8mb4&parseTime=True&loc=Local
+      - APP_DATABASE_MAX_OPEN_CONNS=25
+      - APP_DATABASE_MAX_IDLE_CONNS=10
+      - APP_DATABASE_CONN_MAX_LIFETIME=5m
+      
+      # JWT配置
+      - APP_JWT_SECRET=your-secret-key-change-in-production
+      - APP_JWT_EXPIRE_TIME=24h
+    ports:
+      - "8000:8000"
+    volumes:
+      # 挂载配置文件目录，支持热更新
+      - ./config:/app/config:ro
+      # 可选：挂载当前目录用于开发（如果需要）
+      # - .:/app:ro
+    networks:
+      - realworld-network
+    # 开发环境下可以添加额外的配置
+    # 例如：添加调试端口
+    # expose:
+    #   - "2345"
+
+networks:
+  realworld-network:
+    driver: bridge
 
 volumes:
   mysql_data:
+    driver: local

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github/CiroLong/realworld-gin/internal/config"
 	"github/CiroLong/realworld-gin/internal/pkg/jwt"
 	"github/CiroLong/realworld-gin/internal/repository/gorm"
@@ -24,7 +23,18 @@ func main() {
 		log.Fatalf("load cfg failed: %v", err)
 	}
 	cfg := config.C()
-	fmt.Printf("%#v", cfg)
+
+	log.Println("========== 配置信息 ==========")
+	log.Printf("Server.Addr: %s", cfg.Server.Addr)
+	log.Printf("Server.ReadTimeout: %v", cfg.Server.ReadTimeout)
+	log.Printf("Server.WriteTimeout: %v", cfg.Server.WriteTimeout)
+	log.Printf("Database.DSN: %s", cfg.Database.DSN)
+	log.Printf("Database.MaxOpenConns: %d", cfg.Database.MaxOpenConns)
+	log.Printf("Database.MaxIdleConns: %d", cfg.Database.MaxIdleConns)
+	log.Printf("Database.ConnMaxLifetime: %v", cfg.Database.ConnMaxLifetime)
+	log.Printf("JWT.Secret: %s", cfg.JWT.Secret)
+	log.Printf("JWT.ExpireTime: %v", cfg.JWT.ExpireTime)
+	log.Println("============================")
 
 	// 2. 链接数据库
 	if err := gorm.InitDB(); err != nil {
